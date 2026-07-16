@@ -1,6 +1,5 @@
 import './style.css'
+import Phaser from 'phaser'
+import { gameConfig } from './game/config/gameConfig'
 
-document.querySelector('#app').innerHTML = `
-  <h1>Space Invaders</h1>
-  <p>Game Foundation</p>
-`
+new Phaser.Game(gameConfig)
