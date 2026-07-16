@@ -3,6 +3,8 @@ import Phaser from 'phaser'
 export class BootScene extends Phaser.Scene {
   constructor() {
     super('BootScene')
+
+    this.frameCount = 0
   }
 
   preload() {
@@ -11,9 +13,21 @@ export class BootScene extends Phaser.Scene {
 
   create() {
     console.log('BootScene: create')
+
+    this.spaceKey = this.input.keyboard.addKey(
+      Phaser.Input.Keyboard.KeyCodes.SPACE
+    )
   }
 
   update() {
-    // Game loop
+    this.frameCount++
+
+    if (this.frameCount % 120 === 0) {
+      console.log(`Frame: ${this.frameCount}`)
+    }
+
+    if (Phaser.Input.Keyboard.JustDown(this.spaceKey)) {
+      console.log('SPACE pressed')
+    }
   }
 }
