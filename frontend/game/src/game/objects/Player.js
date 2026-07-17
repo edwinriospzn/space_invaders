@@ -1,7 +1,9 @@
+import { Bullet } from './Bullet.js'
+
 export class Player {
 
     constructor(scene) {
-
+        this.bullets = []
         this.scene = scene
 
         this.x = 400
@@ -10,7 +12,10 @@ export class Player {
         this.width = 40
         this.height = 20
         this.speed = 5
-        this.cursors = this.scene.input.keyboard.createCursorKeys()   
+        this.cursors = this.scene.input.keyboard.createCursorKeys()
+        this.spaceKey = this.scene.input.keyboard.addKey(
+            Phaser.Input.Keyboard.KeyCodes.SPACE
+        )
         this.create()
     }
 
@@ -26,6 +31,19 @@ export class Player {
 
         console.log('Player rendered')
     }
+
+    shoot() {
+
+        const bullet = new Bullet(
+            this.scene,
+            this.graphics.x,
+            this.graphics.y - 20
+        )
+
+        this.bullets.push(bullet)
+
+    }
+
     update() {
         if (this.cursors.left.isDown) {
             this.graphics.x = Math.max(
@@ -39,6 +57,22 @@ export class Player {
                 800 - this.width / 2
             )
         }
+
+        if (Phaser.Input.Keyboard.JustDown(this.spaceKey)) {
+            this.shoot()
+        }
+
+        for (const bullet of this.bullets) {
+            bullet.update()
+        }
+
+        this.bullets = this.bullets.filter(bullet => {
+            if (bullet.isOffScreen()) {
+                bullet.graphics.destroy()
+                return false
+            }
+            return true
+        })
     }
 
 }

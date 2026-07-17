@@ -30,9 +30,5 @@ export class BootScene extends Phaser.Scene {
     if (this.frameCount % 120 === 0) {
       console.log(`Frame: ${this.frameCount}`)
     }
-
-    if (Phaser.Input.Keyboard.JustDown(this.spaceKey)) {
-      console.log('SPACE pressed')
-    }
   }
 }
