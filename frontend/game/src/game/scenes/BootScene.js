@@ -24,6 +24,8 @@ export class BootScene extends Phaser.Scene {
 
   update() {
     this.frameCount++
+    
+    this.player.update()
 
     if (this.frameCount % 120 === 0) {
       console.log(`Frame: ${this.frameCount}`)
