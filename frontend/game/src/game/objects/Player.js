@@ -20,14 +20,12 @@ export class Player {
     }
 
     create() {
-
-        this.graphics = this.scene.add.rectangle(
+        this.sprite = this.scene.add.sprite(
             this.x,
             this.y,
-            this.width,
-            this.height,
-            0x00ff00
+            'player'
         )
+        this.sprite.setScale(2)
 
         console.log('Player rendered')
     }
@@ -36,8 +34,8 @@ export class Player {
 
         const bullet = new Bullet(
             this.scene,
-            this.graphics.x,
-            this.graphics.y - 20
+            this.sprite.x,
+            this.sprite.y - 20
         )
 
         this.bullets.push(bullet)
@@ -57,14 +55,14 @@ export class Player {
     handleMovement() {
 
     if (this.cursors.left.isDown) {
-        this.graphics.x = Math.max(
-            this.graphics.x - this.speed,
+        this.sprite.x = Math.max(
+            this.sprite.x - this.speed,
             this.width / 2
             )
         }
     if (this.cursors.right.isDown) {
-        this.graphics.x = Math.min(
-            this.graphics.x + this.speed,
+        this.sprite.x = Math.min(
+            this.sprite.x + this.speed,
             800 - this.width / 2
             )
         }
@@ -81,7 +79,7 @@ export class Player {
         }
         this.bullets = this.bullets.filter(bullet => {
             if (bullet.isOffScreen()) {
-                bullet.graphics.destroy()
+                bullet.sprite.destroy()
                 return false
             }
             return true

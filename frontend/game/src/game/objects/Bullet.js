@@ -5,7 +5,7 @@ export class Bullet {
 
         this.speed = 8
 
-        this.graphics = this.scene.add.rectangle(
+        this.sprite = this.scene.add.rectangle(
             x,
             y,
             4,
@@ -16,13 +16,13 @@ export class Bullet {
 
     update() {
 
-        this.graphics.y -= this.speed
+        this.sprite.y -= this.speed
 
     }
 
     isOffScreen() {
 
-        return this.graphics.y < 0
+        return this.sprite.y < 0
 
     }
 

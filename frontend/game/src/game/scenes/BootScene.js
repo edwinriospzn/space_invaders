@@ -9,7 +9,14 @@ export class BootScene extends Phaser.Scene {
   }
 
   preload() {
-    console.log('BootScene: preload')
+
+      console.log('BootScene: preload')
+
+      this.load.image(
+          'player',
+          'sprites/player.png'
+      )
+
   }
 
   create() {
