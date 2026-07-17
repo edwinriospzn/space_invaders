@@ -45,27 +45,40 @@ export class Player {
     }
 
     update() {
-        if (this.cursors.left.isDown) {
-            this.graphics.x = Math.max(
-                this.graphics.x - this.speed,
-                this.width / 2
+
+    this.handleMovement()
+
+    this.handleShooting()
+
+    this.updateBullets()
+
+    }
+
+    handleMovement() {
+
+    if (this.cursors.left.isDown) {
+        this.graphics.x = Math.max(
+            this.graphics.x - this.speed,
+            this.width / 2
             )
         }
-        if (this.cursors.right.isDown) {
-            this.graphics.x = Math.min(
-                this.graphics.x + this.speed,
-                800 - this.width / 2
+    if (this.cursors.right.isDown) {
+        this.graphics.x = Math.min(
+            this.graphics.x + this.speed,
+            800 - this.width / 2
             )
         }
+    }
+    handleShooting() {
 
-        if (Phaser.Input.Keyboard.JustDown(this.spaceKey)) {
-            this.shoot()
+    if (Phaser.Input.Keyboard.JustDown(this.spaceKey)) {
+        this.shoot()
         }
-
+    }
+    updateBullets() {
         for (const bullet of this.bullets) {
             bullet.update()
         }
-
         this.bullets = this.bullets.filter(bullet => {
             if (bullet.isOffScreen()) {
                 bullet.graphics.destroy()
@@ -74,5 +87,4 @@ export class Player {
             return true
         })
     }
-
 }
