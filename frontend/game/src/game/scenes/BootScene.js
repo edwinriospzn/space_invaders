@@ -1,4 +1,5 @@
 import Phaser from 'phaser'
+import { Player } from '../objects/Player'
 
 export class BootScene extends Phaser.Scene {
   constructor() {
@@ -17,6 +18,8 @@ export class BootScene extends Phaser.Scene {
     this.spaceKey = this.input.keyboard.addKey(
       Phaser.Input.Keyboard.KeyCodes.SPACE
     )
+
+    this.player = new Player(this)
   }
 
   update() {
