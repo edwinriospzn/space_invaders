@@ -7,22 +7,21 @@ export class BootScene extends Phaser.Scene {
     super('BootScene')
 
     this.frameCount = 0
+    this.enemyDirection = 1
+    this.enemySpeed = 1
+    this.enemyStepDown = 20
   }
 
 preload() {
-
     console.log('BootScene: preload')
-
     this.load.image(
         'player',
         'sprites/player.png'
     )
-
     this.load.image(
         'enemy',
         'sprites/enemy.png'
     )
-
     }
 
   create() {
@@ -52,13 +51,41 @@ preload() {
         }
     }
   }
+  moveEnemies() {
+      let leftMost = Infinity
+      let rightMost = -Infinity
+      for (const enemy of this.enemies) {
+          leftMost = Math.min(leftMost, enemy.sprite.x)
+          rightMost = Math.max(rightMost, enemy.sprite.x)
+      }
+      if (rightMost >= 780 && this.enemyDirection === 1) {
+          this.enemyDirection = -1
+          for (const enemy of this.enemies) {
+              enemy.sprite.y += this.enemyStepDown
+          }
+      }
+
+      if (leftMost <= 20 && this.enemyDirection === -1) {
+          this.enemyDirection = 1
+          for (const enemy of this.enemies) {
+              enemy.sprite.y += this.enemyStepDown
+          }
+      }
+      for (const enemy of this.enemies) {
+          enemy.sprite.x += this.enemySpeed * this.enemyDirection
+      }
+  }
 
   update() {
       this.frameCount++
       this.player.update()
+
       for (const enemy of this.enemies) {
           enemy.update()
       }
+
+      this.moveEnemies()
+
       if (this.frameCount % 120 === 0) {
           console.log(`Frame: ${this.frameCount}`)
       }
