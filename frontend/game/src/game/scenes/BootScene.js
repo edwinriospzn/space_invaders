@@ -1,5 +1,6 @@
 import Phaser from 'phaser'
 import { Player } from '../objects/Player'
+import { Enemy } from '../objects/Enemy'
 
 export class BootScene extends Phaser.Scene {
   constructor() {
@@ -8,16 +9,21 @@ export class BootScene extends Phaser.Scene {
     this.frameCount = 0
   }
 
-  preload() {
+preload() {
 
-      console.log('BootScene: preload')
+    console.log('BootScene: preload')
 
-      this.load.image(
-          'player',
-          'sprites/player.png'
-      )
+    this.load.image(
+        'player',
+        'sprites/player.png'
+    )
 
-  }
+    this.load.image(
+        'enemy',
+        'sprites/enemy.png'
+    )
+
+    }
 
   create() {
     console.log('BootScene: create')
@@ -27,13 +33,18 @@ export class BootScene extends Phaser.Scene {
     )
 
     this.player = new Player(this)
+    this.enemy = new Enemy(
+    this,
+    400,
+    120
+    )
   }
 
   update() {
     this.frameCount++
     
     this.player.update()
-
+    this.enemy.update()
     if (this.frameCount % 120 === 0) {
       console.log(`Frame: ${this.frameCount}`)
     }
