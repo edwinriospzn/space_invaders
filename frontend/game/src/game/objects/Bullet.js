@@ -14,6 +14,11 @@ export class Bullet {
         )
     }
 
+    destroy() {
+        this.sprite.destroy()
+        this.destroyed = true
+    }
+
     update() {
 
         this.sprite.y -= this.speed

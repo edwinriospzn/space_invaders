@@ -23,6 +23,12 @@ export class Enemy {
         console.log('Enemy created')
     }
 
+    destroy() {
+        this.sprite.destroy()
+        this.destroyed = true
+    }
+
+
     update() {
 
     }

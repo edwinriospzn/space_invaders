@@ -44,42 +44,47 @@ export class Player {
 
     update() {
 
-    this.handleMovement()
+        this.handleMovement()
 
-    this.handleShooting()
+        this.handleShooting()
 
-    this.updateBullets()
+        this.updateBullets()
 
     }
 
     handleMovement() {
 
-    if (this.cursors.left.isDown) {
-        this.sprite.x = Math.max(
-            this.sprite.x - this.speed,
-            this.width / 2
+        if (this.cursors.left.isDown) {
+            this.sprite.x = Math.max(
+                this.sprite.x - this.speed,
+                this.width / 2
             )
         }
-    if (this.cursors.right.isDown) {
-        this.sprite.x = Math.min(
-            this.sprite.x + this.speed,
-            800 - this.width / 2
+        if (this.cursors.right.isDown) {
+            this.sprite.x = Math.min(
+                this.sprite.x + this.speed,
+                800 - this.width / 2
             )
         }
     }
+
     handleShooting() {
 
-    if (Phaser.Input.Keyboard.JustDown(this.spaceKey)) {
-        this.shoot()
+        if (Phaser.Input.Keyboard.JustDown(this.spaceKey)) {
+            this.shoot()
         }
     }
+
     updateBullets() {
         for (const bullet of this.bullets) {
             bullet.update()
         }
         this.bullets = this.bullets.filter(bullet => {
+            if (bullet.destroyed) {
+                return false
+            }
             if (bullet.isOffScreen()) {
-                bullet.sprite.destroy()
+                bullet.destroy()
                 return false
             }
             return true
