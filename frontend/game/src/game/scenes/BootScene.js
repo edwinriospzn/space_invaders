@@ -74,18 +74,33 @@ preload() {
       for (const enemy of this.enemies) {
           enemy.sprite.x += this.enemySpeed * this.enemyDirection
       }
-  }
+    }
+  checkCollisions() {
+      for (const bullet of this.player.bullets) {
+        for (const enemy of this.enemies) {
+          if (this.isColliding(bullet, enemy)) {
+            console.log("Collision detected!")
+          }
+        }
+      }
+    }
 
+  isColliding(bullet, enemy) {
+      const bulletBounds = bullet.sprite.getBounds()
+      const enemyBounds = enemy.sprite.getBounds()
+      return Phaser.Geom.Intersects.RectangleToRectangle(
+          bulletBounds,
+          enemyBounds
+      )
+    }
   update() {
       this.frameCount++
       this.player.update()
-
+      this.moveEnemies()
+      this.checkCollisions()
       for (const enemy of this.enemies) {
           enemy.update()
       }
-
-      this.moveEnemies()
-
       if (this.frameCount % 120 === 0) {
           console.log(`Frame: ${this.frameCount}`)
       }
