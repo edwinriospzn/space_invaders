@@ -1,5 +1,7 @@
 import Phaser from 'phaser'
+import { GameScene } from '../scenes/GameScene'
 import { BootScene } from '../scenes/BootScene'
+
 
 export const gameConfig = {
   type: Phaser.AUTO,
@@ -11,5 +13,8 @@ export const gameConfig = {
 
   parent: 'app',
 
-  scene: [BootScene]
+  scene: [
+      BootScene,
+      GameScene
+  ]
 }
