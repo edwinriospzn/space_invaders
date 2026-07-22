@@ -1,6 +1,7 @@
 import Phaser from 'phaser'
 import { Player } from '../objects/Player'
 import { Enemy } from '../objects/Enemy'
+import { ScoreManager } from '../managers/ScoreManager'
 
 export class BootScene extends Phaser.Scene {
     constructor() {
@@ -32,6 +33,7 @@ export class BootScene extends Phaser.Scene {
         )
 
         this.player = new Player(this)
+        this.scoreManager = new ScoreManager(this)
         this.enemies = []
         const rows = 3
         const columns = 5
@@ -85,6 +87,7 @@ export class BootScene extends Phaser.Scene {
                 }
                 bullet.destroy()
                 enemy.destroy()
+                this.scoreManager.addPoints(10)
                 return
             }
         }
