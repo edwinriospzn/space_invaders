@@ -2,6 +2,7 @@ import Phaser from 'phaser'
 import { Player } from '../objects/Player'
 import { Enemy } from '../objects/Enemy'
 import { ScoreManager } from '../managers/ScoreManager'
+import { TimerManager } from '../managers/TimerManager'
 
 export class BootScene extends Phaser.Scene {
     constructor() {
@@ -34,6 +35,7 @@ export class BootScene extends Phaser.Scene {
 
         this.player = new Player(this)
         this.scoreManager = new ScoreManager(this)
+        this.timerManager = new TimerManager(this)
         this.enemies = []
         const rows = 3
         const columns = 5
