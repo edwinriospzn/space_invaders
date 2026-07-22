@@ -4,6 +4,7 @@ import { Enemy } from '../objects/Enemy'
 import { ScoreManager } from '../managers/ScoreManager'
 import { TimerManager } from '../managers/TimerManager'
 import { GAME_CONFIG } from '../config/gameConstants.js'
+import { EnemyFormation } from '../objects/EnemyFormation'
 
 export class GameScene extends Phaser.Scene {
     constructor() {
@@ -46,55 +47,38 @@ export class GameScene extends Phaser.Scene {
             this,
             () => this.gameOver()
         )
-        this.enemies = []
-        const rows = 3
-        const columns = 5
-
-        const startX = 180
-        const startY = 100
-
-        const spacingX = 100
-        const spacingY = 70
-
-        for (let row = 0; row < rows; row++) {
-            for (let column = 0; column < columns; column++) {
-                const x = startX + column * spacingX
-                const y = startY + row * spacingY
-                const enemy = new Enemy(this, x, y)
-                this.enemies.push(enemy)
-            }
-        }
+        this.enemyFormation = new EnemyFormation(this)
     }
 
     moveEnemies(delta) {
         let leftMost = Infinity
         let rightMost = -Infinity
-        for (const enemy of this.enemies) {
+        for (const enemy of this.enemyFormation.enemies) {
             leftMost = Math.min(leftMost, enemy.sprite.x)
             rightMost = Math.max(rightMost, enemy.sprite.x)
         }
         if (rightMost >= GAME_CONFIG.SCREEN_WIDTH - 20 && this.enemyDirection === 1) {
             this.enemyDirection = -1
-            for (const enemy of this.enemies) {
+            for (const enemy of this.enemyFormation.enemies) {
                 enemy.sprite.y += this.enemyStepDown
             }
         }
 
         if (leftMost <= 20 && this.enemyDirection === -1) {
             this.enemyDirection = 1
-            for (const enemy of this.enemies) {
+            for (const enemy of this.enemyFormation.enemies) {
                 enemy.sprite.y += this.enemyStepDown
             }
         }
         const distance = this.enemySpeed * (delta / 1000)
-        for (const enemy of this.enemies) {
+        for (const enemy of this.enemyFormation.enemies) {
             enemy.sprite.x += distance * this.enemyDirection
         }
     }
 
     checkCollisions() {
         for (const bullet of this.player.bullets) {
-            for (const enemy of this.enemies) {
+            for (const enemy of this.enemyFormation.enemies) {
                 if (!this.isColliding(bullet, enemy)) {
                     continue
                 }
@@ -119,7 +103,7 @@ export class GameScene extends Phaser.Scene {
         if (this.gameFinished) {
             return
         }
-        if (this.enemies.length === 0) {
+        if (this.enemyFormation.enemies.length === 0) {
             this.gameFinished = true
             this.timerManager.stop()
             this.showEndGameMessage("YOU WIN!")
@@ -159,9 +143,9 @@ export class GameScene extends Phaser.Scene {
         this.player.update(delta)
         this.moveEnemies(delta)
         this.checkCollisions()
-        this.enemies = this.enemies.filter(enemy => !enemy.destroyed)
+        this.enemyFormation.enemies = this.enemyFormation.enemies.filter(enemy => !enemy.destroyed)
         this.checkVictory()
-        for (const enemy of this.enemies) {
+        for (const enemy of this.enemyFormation.enemies) {
             enemy.update()
         }
         if (this.frameCount % 120 === 0) {
