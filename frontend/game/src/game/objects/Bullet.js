@@ -1,9 +1,11 @@
+import { GAME_CONFIG } from '../config/gameConstants.js'
+
 export class Bullet {
 
     constructor(scene, x, y) {
         this.scene = scene
 
-        this.speed = 8
+        this.speed = GAME_CONFIG.BULLET_SPEED
 
         this.sprite = this.scene.add.rectangle(
             x,
@@ -19,9 +21,9 @@ export class Bullet {
         this.destroyed = true
     }
 
-    update() {
+    update(delta) {
 
-        this.sprite.y -= this.speed
+        this.sprite.y -= this.speed * (delta / 1000)
 
     }
 

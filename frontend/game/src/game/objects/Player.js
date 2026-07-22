@@ -1,4 +1,5 @@
 import { Bullet } from './Bullet.js'
+import { GAME_CONFIG } from '../config/gameConstants.js'
 
 export class Player {
 
@@ -11,7 +12,7 @@ export class Player {
 
         this.width = 40
         this.height = 20
-        this.speed = 5
+        this.speed = GAME_CONFIG.PLAYER_SPEED
         this.cursors = this.scene.input.keyboard.createCursorKeys()
         this.spaceKey = this.scene.input.keyboard.addKey(
             Phaser.Input.Keyboard.KeyCodes.SPACE
@@ -42,28 +43,30 @@ export class Player {
 
     }
 
-    update() {
+    update(delta) {
 
-        this.handleMovement()
+        this.handleMovement(delta)
 
         this.handleShooting()
 
-        this.updateBullets()
+        this.updateBullets(delta)
 
     }
 
-    handleMovement() {
+    handleMovement(delta) {
+
+        const distance = this.speed * (delta / 1000)
 
         if (this.cursors.left.isDown) {
             this.sprite.x = Math.max(
-                this.sprite.x - this.speed,
+                this.sprite.x - distance,
                 this.width / 2
             )
         }
         if (this.cursors.right.isDown) {
             this.sprite.x = Math.min(
-                this.sprite.x + this.speed,
-                800 - this.width / 2
+                this.sprite.x + distance,
+                GAME_CONFIG.SCREEN_WIDTH - this.width / 2
             )
         }
     }
@@ -75,9 +78,9 @@ export class Player {
         }
     }
 
-    updateBullets() {
+    updateBullets(delta) {
         for (const bullet of this.bullets) {
-            bullet.update()
+            bullet.update(delta)
         }
         this.bullets = this.bullets.filter(bullet => {
             if (bullet.destroyed) {

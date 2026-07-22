@@ -1,0 +1,16 @@
+// src/game/config/gameConstants.js
+
+export const GAME_CONFIG = {
+  SCREEN_WIDTH: 800,
+  SCREEN_HEIGHT: 600,
+
+  PLAYER_SPEED: 300,
+
+  BULLET_SPEED: 500,
+
+  GAME_TIME: 60000,
+
+  ENEMY_POINTS: 100,
+
+  FORMATION_SPEED: 40
+}

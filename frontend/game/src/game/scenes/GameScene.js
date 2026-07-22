@@ -3,6 +3,7 @@ import { Player } from '../objects/Player'
 import { Enemy } from '../objects/Enemy'
 import { ScoreManager } from '../managers/ScoreManager'
 import { TimerManager } from '../managers/TimerManager'
+import { GAME_CONFIG } from '../config/gameConstants.js'
 
 export class GameScene extends Phaser.Scene {
     constructor() {
@@ -10,7 +11,7 @@ export class GameScene extends Phaser.Scene {
 
         this.frameCount = 0
         this.enemyDirection = 1
-        this.enemySpeed = 1
+        this.enemySpeed = GAME_CONFIG.FORMATION_SPEED
         this.enemyStepDown = 20
         this.gameFinished = false
         this.endGameText = null
@@ -65,14 +66,14 @@ export class GameScene extends Phaser.Scene {
         }
     }
 
-    moveEnemies() {
+    moveEnemies(delta) {
         let leftMost = Infinity
         let rightMost = -Infinity
         for (const enemy of this.enemies) {
             leftMost = Math.min(leftMost, enemy.sprite.x)
             rightMost = Math.max(rightMost, enemy.sprite.x)
         }
-        if (rightMost >= 780 && this.enemyDirection === 1) {
+        if (rightMost >= GAME_CONFIG.SCREEN_WIDTH - 20 && this.enemyDirection === 1) {
             this.enemyDirection = -1
             for (const enemy of this.enemies) {
                 enemy.sprite.y += this.enemyStepDown
@@ -85,8 +86,9 @@ export class GameScene extends Phaser.Scene {
                 enemy.sprite.y += this.enemyStepDown
             }
         }
+        const distance = this.enemySpeed * (delta / 1000)
         for (const enemy of this.enemies) {
-            enemy.sprite.x += this.enemySpeed * this.enemyDirection
+            enemy.sprite.x += distance * this.enemyDirection
         }
     }
 
@@ -98,7 +100,7 @@ export class GameScene extends Phaser.Scene {
                 }
                 bullet.destroy()
                 enemy.destroy()
-                this.scoreManager.addPoints(10)
+                this.scoreManager.addPoints(GAME_CONFIG.ENEMY_POINTS)
                 return
             }
         }
@@ -146,7 +148,7 @@ export class GameScene extends Phaser.Scene {
         )
         this.endGameText.setOrigin(0.5)
     }
-    update() {
+    update(time, delta) {
         if (this.gameFinished) {
             if (Phaser.Input.Keyboard.JustDown(this.restartKey)) {
                 this.scene.restart()
@@ -154,8 +156,8 @@ export class GameScene extends Phaser.Scene {
             return
         }
         this.frameCount++
-        this.player.update()
-        this.moveEnemies()
+        this.player.update(delta)
+        this.moveEnemies(delta)
         this.checkCollisions()
         this.enemies = this.enemies.filter(enemy => !enemy.destroyed)
         this.checkVictory()
