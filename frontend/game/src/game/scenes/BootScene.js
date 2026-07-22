@@ -12,6 +12,8 @@ export class BootScene extends Phaser.Scene {
         this.enemyDirection = 1
         this.enemySpeed = 1
         this.enemyStepDown = 20
+        this.gameFinished = false
+        this.endGameText = null
     }
 
     preload() {
@@ -28,14 +30,21 @@ export class BootScene extends Phaser.Scene {
 
     create() {
         console.log('BootScene: create')
+        this.gameFinished = false
+        this.endGameText = null
 
         this.spaceKey = this.input.keyboard.addKey(
             Phaser.Input.Keyboard.KeyCodes.SPACE
         )
-
+        this.restartKey = this.input.keyboard.addKey(
+            Phaser.Input.Keyboard.KeyCodes.R
+        )
         this.player = new Player(this)
         this.scoreManager = new ScoreManager(this)
-        this.timerManager = new TimerManager(this)
+        this.timerManager = new TimerManager(
+            this,
+            () => this.gameOver()
+        )
         this.enemies = []
         const rows = 3
         const columns = 5
@@ -104,12 +113,52 @@ export class BootScene extends Phaser.Scene {
         )
     }
 
+    checkVictory() {
+        if (this.gameFinished) {
+            return
+        }
+        if (this.enemies.length === 0) {
+            this.gameFinished = true
+            this.timerManager.stop()
+            this.showEndGameMessage("YOU WIN!")
+            console.log("YOU WIN!")
+        }
+    }
+    gameOver() {
+        if (this.gameFinished) {
+            return
+        }
+        this.gameFinished = true
+        this.timerManager.stop()
+        this.showEndGameMessage("GAME OVER")
+        console.log("GAME OVER!")
+    }
+    showEndGameMessage(message) {
+        this.endGameText = this.add.text(
+            400,
+            300,
+            `${message}\n\nPress R to Restart`,
+            {
+                fontSize: '36px',
+                color: '#ffffff',
+                align: 'center'
+            }
+        )
+        this.endGameText.setOrigin(0.5)
+    }
     update() {
+        if (this.gameFinished) {
+            if (Phaser.Input.Keyboard.JustDown(this.restartKey)) {
+                this.scene.restart()
+            }
+            return
+        }
         this.frameCount++
         this.player.update()
         this.moveEnemies()
         this.checkCollisions()
         this.enemies = this.enemies.filter(enemy => !enemy.destroyed)
+        this.checkVictory()
         for (const enemy of this.enemies) {
             enemy.update()
         }
