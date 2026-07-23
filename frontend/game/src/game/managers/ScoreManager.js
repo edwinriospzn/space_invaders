@@ -1,3 +1,5 @@
+import { GameEventFactory } from '../events/GameEventFactory'
+
 export class ScoreManager {
 
     constructor(scene) {
@@ -24,6 +26,15 @@ export class ScoreManager {
 
         this.scoreText.setText(
             `Score: ${this.score}`
+        )
+
+        this.scene.telemetryManager.track(
+            GameEventFactory.createScoreUpdated(
+                this.scene.sessionId,
+                {
+                    newScore: this.score
+                }
+            )
         )
 
     }

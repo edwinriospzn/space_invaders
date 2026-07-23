@@ -38,6 +38,10 @@ export class EnemyFormation {
                     'BASIC'
                 )
 
+                enemy.id = `enemy-${row}-${column}`
+                enemy.row = row
+                enemy.column = column
+
                 this.enemies.push(enemy)
 
             }

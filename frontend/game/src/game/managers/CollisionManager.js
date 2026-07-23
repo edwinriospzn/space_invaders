@@ -1,5 +1,6 @@
 import Phaser from 'phaser'
 import { GAME_CONFIG } from '../config/gameConstants'
+import { GameEventFactory } from '../events/GameEventFactory'
 
 export class CollisionManager {
 
@@ -20,6 +21,19 @@ export class CollisionManager {
                 bullet.destroy()
                 enemy.destroy()
                 this.scene.scoreManager.addPoints(GAME_CONFIG.ENEMY_POINTS)
+
+                this.scene.telemetryManager.track(
+                    GameEventFactory.createEnemyDestroyed(
+                        this.scene.sessionId,
+                        {
+                            enemyId: enemy.id,
+                            row: enemy.row,
+                            column: enemy.column,
+                            scoreAwarded: GAME_CONFIG.ENEMY_POINTS
+                        }
+                    )
+                )
+
                 return
             }
         }

@@ -1,5 +1,6 @@
 import { Bullet } from './Bullet.js'
 import { GAME_CONFIG } from '../config/gameConstants.js'
+import { GameEventFactory } from '../events/GameEventFactory'
 
 export class Player {
 
@@ -41,6 +42,16 @@ export class Player {
 
         this.bullets.push(bullet)
 
+        this.scene.telemetryManager.track(
+            GameEventFactory.createPlayerShot(
+                this.scene.sessionId,
+                {
+                    x: this.sprite.x,
+                    y: this.sprite.y - 20
+                }
+            )
+        )
+
     }
 
     update(delta) {
@@ -62,11 +73,31 @@ export class Player {
                 this.sprite.x - distance,
                 this.width / 2
             )
+            this.scene.telemetryManager.track(
+                GameEventFactory.createPlayerMove(
+                    this.scene.sessionId,
+                    {
+                        x: this.sprite.x,
+                        y: this.sprite.y,
+                        direction: 'left'
+                    }
+                )
+            )
         }
         if (this.cursors.right.isDown) {
             this.sprite.x = Math.min(
                 this.sprite.x + distance,
                 GAME_CONFIG.SCREEN_WIDTH - this.width / 2
+            )
+            this.scene.telemetryManager.track(
+                GameEventFactory.createPlayerMove(
+                    this.scene.sessionId,
+                    {
+                        x: this.sprite.x,
+                        y: this.sprite.y,
+                        direction: 'right'
+                    }
+                )
             )
         }
     }
