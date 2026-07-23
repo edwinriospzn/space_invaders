@@ -6,6 +6,9 @@ import { TimerManager } from '../managers/TimerManager'
 import { EnemyFormation } from '../objects/EnemyFormation'
 import { GameStateManager } from '../managers/GameStateManager'
 import { CollisionManager } from '../managers/CollisionManager'
+import { createSessionId } from '../utils/SessionManager'
+import { TelemetryManager } from '../managers/TelemetryManager'
+import { GameEventFactory } from '../events/GameEventFactory'
 
 export class GameScene extends Phaser.Scene {
     constructor() {
@@ -40,6 +43,15 @@ export class GameScene extends Phaser.Scene {
         this.enemyFormation = new EnemyFormation(this)
         this.collisionManager = new CollisionManager(this)
         this.gameStateManager = new GameStateManager(this)
+
+        this.sessionId = createSessionId()
+        this.telemetryManager = new TelemetryManager(this.sessionId)
+        this.gameStartTime = Date.now()
+        this.telemetryReported = false
+
+        this.telemetryManager.track(
+            GameEventFactory.createGameStart(this.sessionId)
+        )
     }
 
 
@@ -49,6 +61,22 @@ export class GameScene extends Phaser.Scene {
         this.gameStateManager.update()
 
         if (this.gameStateManager.isGameFinished()) {
+            if (!this.telemetryReported) {
+                this.telemetryReported = true
+
+                this.telemetryManager.track(
+                    GameEventFactory.createGameEnd(
+                        this.sessionId,
+                        {
+                            score: this.scoreManager.getScore(),
+                            elapsedTime: Date.now() - this.gameStartTime,
+                            result: this.enemyFormation.getAliveCount() === 0 ? 'WIN' : 'LOSE'
+                        }
+                    )
+                )
+
+                console.log(this.telemetryManager.getEvents())
+            }
             return
         }
 
