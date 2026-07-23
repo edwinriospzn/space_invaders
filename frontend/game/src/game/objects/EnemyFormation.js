@@ -50,7 +50,7 @@ export class EnemyFormation {
     getAliveCount() {
         return this.enemies.length
     }
-    update(delta) {
+    move(delta) {
         let leftMost = Infinity
         let rightMost = -Infinity
         for (const enemy of this.enemies) {
@@ -75,4 +75,11 @@ export class EnemyFormation {
             enemy.sprite.x += distance * this.enemyDirection
         }
     }
+    update(delta) {
+        this.move(delta)
+            for (const enemy of this.enemies) {
+            enemy.update()
+        }
+    }
+
 }

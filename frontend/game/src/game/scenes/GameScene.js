@@ -104,21 +104,26 @@ export class GameScene extends Phaser.Scene {
         this.endGameText.setOrigin(0.5)
     }
     update(time, delta) {
+
         if (this.gameFinished) {
             if (Phaser.Input.Keyboard.JustDown(this.restartKey)) {
                 this.scene.restart()
             }
             return
         }
+
         this.frameCount++
+
         this.player.update(delta)
+
         this.enemyFormation.update(delta)
+
         this.checkCollisions()
+
         this.enemyFormation.removeDestroyedEnemies()
+
         this.checkVictory()
-        for (const enemy of this.enemyFormation.getEnemies()) {
-            enemy.update()
-        }
+
         if (this.frameCount % 120 === 0) {
             console.log(`Frame: ${this.frameCount}`)
         }
