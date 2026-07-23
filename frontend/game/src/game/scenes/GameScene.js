@@ -5,14 +5,12 @@ import { ScoreManager } from '../managers/ScoreManager'
 import { TimerManager } from '../managers/TimerManager'
 import { GAME_CONFIG } from '../config/gameConstants.js'
 import { EnemyFormation } from '../objects/EnemyFormation'
+import { GameStateManager } from '../managers/GameStateManager'
 
 export class GameScene extends Phaser.Scene {
     constructor() {
         super('GameScene')
-
         this.frameCount = 0
-        this.gameFinished = false
-        this.endGameText = null
     }
 
     preload() {
@@ -29,8 +27,7 @@ export class GameScene extends Phaser.Scene {
 
     create() {
         console.log('BootScene: create')
-        this.gameFinished = false
-        this.endGameText = null
+        this.gameStateManager = new GameStateManager(this)
 
         this.spaceKey = this.input.keyboard.addKey(
             Phaser.Input.Keyboard.KeyCodes.SPACE
@@ -71,21 +68,21 @@ export class GameScene extends Phaser.Scene {
     }
 
     checkVictory() {
-        if (this.gameFinished) {
+        if (this.gameStateManager.isGameFinished()) {
             return
         }
         if (this.enemyFormation.getAliveCount() === 0) {
-            this.gameFinished = true
+            this.gameStateManager.setGameFinished(true)
             this.timerManager.stop()
             this.showEndGameMessage("YOU WIN!")
             console.log("YOU WIN!")
         }
     }
     gameOver() {
-        if (this.gameFinished) {
+        if (this.gameStateManager.isGameFinished()) {
             return
         }
-        this.gameFinished = true
+        this.gameStateManager.setGameFinished(true)
         this.timerManager.stop()
         this.showEndGameMessage("GAME OVER")
         console.log("GAME OVER!")
@@ -105,7 +102,7 @@ export class GameScene extends Phaser.Scene {
     }
     update(time, delta) {
 
-        if (this.gameFinished) {
+        if (this.gameStateManager.isGameFinished()) {
             if (Phaser.Input.Keyboard.JustDown(this.restartKey)) {
                 this.scene.restart()
             }
