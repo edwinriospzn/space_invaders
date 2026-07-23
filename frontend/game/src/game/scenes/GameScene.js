@@ -46,7 +46,7 @@ export class GameScene extends Phaser.Scene {
     checkCollisions() {
         for (const bullet of this.player.bullets) {
             for (const enemy of this.enemyFormation.getEnemies()) {
-                if (!this.isColliding(bullet, enemy)) {
+                if (!this.collisionManager.isColliding(bullet, enemy)) {
                     continue
                 }
                 bullet.destroy()
@@ -55,15 +55,6 @@ export class GameScene extends Phaser.Scene {
                 return
             }
         }
-    }
-
-    isColliding(bullet, enemy) {
-        const bulletBounds = bullet.sprite.getBounds()
-        const enemyBounds = enemy.sprite.getBounds()
-        return Phaser.Geom.Intersects.RectangleToRectangle(
-            bulletBounds,
-            enemyBounds
-        )
     }
 
 
