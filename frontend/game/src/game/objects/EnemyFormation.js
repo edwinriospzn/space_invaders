@@ -31,7 +31,12 @@ export class EnemyFormation {
                 const x = startX + column * spacingX
                 const y = startY + row * spacingY
 
-                const enemy = new Enemy(this.scene, x, y)
+                const enemy = new Enemy(
+                    this.scene,
+                    x,
+                    y,
+                    'BASIC'
+                )
 
                 this.enemies.push(enemy)
 

@@ -20,5 +20,13 @@ export const GAME_CONFIG = {
   FORMATION_START_Y: 100,
   FORMATION_SPACING_X: 100,
   FORMATION_SPACING_Y: 70,
-  FORMATION_STEP_DOWN: 20
+  FORMATION_STEP_DOWN: 20,
+
+  ENEMY_TYPES: {
+    BASIC: {
+      speed: 0,
+      points: 100,
+      texture: 'enemy'
+    }
+  }
 }

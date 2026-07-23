@@ -1,11 +1,16 @@
+import { GAME_CONFIG } from '../config/gameConstants'
+
 export class Enemy {
 
-    constructor(scene, x, y) {
+    constructor(scene, x, y, type = 'BASIC') {
 
         this.scene = scene
 
         this.x = x
         this.y = y
+
+        this.type = type
+        this.config = GAME_CONFIG.ENEMY_TYPES[type]
 
         this.create()
     }
@@ -15,7 +20,7 @@ export class Enemy {
         this.sprite = this.scene.add.sprite(
             this.x,
             this.y,
-            'enemy'
+            this.config.texture
         )
 
         this.sprite.setScale(2)
