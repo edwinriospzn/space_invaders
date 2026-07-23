@@ -1,0 +1,32 @@
+// src/game/config/gameConstants.js
+
+export const GAME_CONFIG = {
+  SCREEN_WIDTH: 800,
+  SCREEN_HEIGHT: 600,
+
+  PLAYER_SPEED: 300,
+
+  BULLET_SPEED: 500,
+
+  GAME_TIME: 60000,
+
+  ENEMY_POINTS: 100,
+
+  FORMATION_SPEED: 40,
+
+  FORMATION_ROWS: 3,
+  FORMATION_COLUMNS: 5,
+  FORMATION_START_X: 180,
+  FORMATION_START_Y: 100,
+  FORMATION_SPACING_X: 100,
+  FORMATION_SPACING_Y: 70,
+  FORMATION_STEP_DOWN: 20,
+
+  ENEMY_TYPES: {
+    BASIC: {
+      speed: 0,
+      points: 100,
+      texture: 'enemy'
+    }
+  }
+}
