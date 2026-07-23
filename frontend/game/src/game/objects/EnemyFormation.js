@@ -11,19 +11,19 @@ export class EnemyFormation {
 
         this.enemyDirection = 1
         this.enemySpeed = GAME_CONFIG.FORMATION_SPEED
-        this.enemyStepDown = 20
+        this.enemyStepDown = GAME_CONFIG.FORMATION_STEP_DOWN
         this.createFormation()
     }
     createFormation() {
 
-        const rows = 3
-        const columns = 5
+        const rows = GAME_CONFIG.FORMATION_ROWS
+        const columns = GAME_CONFIG.FORMATION_COLUMNS
 
-        const startX = 180
-        const startY = 100
+        const startX = GAME_CONFIG.FORMATION_START_X
+        const startY = GAME_CONFIG.FORMATION_START_Y
 
-        const spacingX = 100
-        const spacingY = 70
+        const spacingX = GAME_CONFIG.FORMATION_SPACING_X
+        const spacingY = GAME_CONFIG.FORMATION_SPACING_Y
 
         for (let row = 0; row < rows; row++) {
             for (let column = 0; column < columns; column++) {
