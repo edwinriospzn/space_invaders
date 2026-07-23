@@ -49,7 +49,7 @@ export class GameScene extends Phaser.Scene {
 
     checkCollisions() {
         for (const bullet of this.player.bullets) {
-            for (const enemy of this.enemyFormation.enemies) {
+            for (const enemy of this.enemyFormation.getEnemies()) {
                 if (!this.isColliding(bullet, enemy)) {
                     continue
                 }
@@ -74,7 +74,7 @@ export class GameScene extends Phaser.Scene {
         if (this.gameFinished) {
             return
         }
-        if (this.enemyFormation.enemies.length === 0) {
+        if (this.enemyFormation.getAliveCount() === 0) {
             this.gameFinished = true
             this.timerManager.stop()
             this.showEndGameMessage("YOU WIN!")
@@ -114,9 +114,9 @@ export class GameScene extends Phaser.Scene {
         this.player.update(delta)
         this.enemyFormation.update(delta)
         this.checkCollisions()
-        this.enemyFormation.enemies = this.enemyFormation.enemies.filter(enemy => !enemy.destroyed)
+        this.enemyFormation.removeDestroyedEnemies()
         this.checkVictory()
-        for (const enemy of this.enemyFormation.enemies) {
+        for (const enemy of this.enemyFormation.getEnemies()) {
             enemy.update()
         }
         if (this.frameCount % 120 === 0) {

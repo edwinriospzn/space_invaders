@@ -39,6 +39,17 @@ export class EnemyFormation {
         }
 
     }
+    getEnemies() { 
+        return this.enemies 
+    }
+    removeDestroyedEnemies() {
+        this.enemies = this.enemies.filter(
+            enemy => !enemy.destroyed
+        )
+    }
+    getAliveCount() {
+        return this.enemies.length
+    }
     update(delta) {
         let leftMost = Infinity
         let rightMost = -Infinity
