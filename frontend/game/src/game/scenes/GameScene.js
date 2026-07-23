@@ -74,7 +74,7 @@ export class GameScene extends Phaser.Scene {
         if (this.enemyFormation.getAliveCount() === 0) {
             this.gameStateManager.setGameFinished(true)
             this.timerManager.stop()
-            this.showEndGameMessage("YOU WIN!")
+            this.gameStateManager.showMessage("YOU WIN!")
             console.log("YOU WIN!")
         }
     }
@@ -84,22 +84,10 @@ export class GameScene extends Phaser.Scene {
         }
         this.gameStateManager.setGameFinished(true)
         this.timerManager.stop()
-        this.showEndGameMessage("GAME OVER")
+        this.gameStateManager.showMessage("GAME OVER")
         console.log("GAME OVER!")
     }
-    showEndGameMessage(message) {
-        this.endGameText = this.add.text(
-            400,
-            300,
-            `${message}\n\nPress R to Restart`,
-            {
-                fontSize: '36px',
-                color: '#ffffff',
-                align: 'center'
-            }
-        )
-        this.endGameText.setOrigin(0.5)
-    }
+
     update(time, delta) {
 
         if (this.gameStateManager.isGameFinished()) {
