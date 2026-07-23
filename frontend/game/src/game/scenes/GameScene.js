@@ -9,6 +9,7 @@ import { CollisionManager } from '../managers/CollisionManager'
 import { createSessionId } from '../utils/SessionManager'
 import { TelemetryManager } from '../managers/TelemetryManager'
 import { GameEventFactory } from '../events/GameEventFactory'
+import { ConsoleTelemetryExporter } from '../telemetry/ConsoleTelemetryExporter'
 
 export class GameScene extends Phaser.Scene {
     constructor() {
@@ -75,7 +76,8 @@ export class GameScene extends Phaser.Scene {
                     )
                 )
 
-                console.log(this.telemetryManager.getEvents())
+                const exporter = new ConsoleTelemetryExporter()
+                exporter.export(this.telemetryManager.getEvents())
             }
             return
         }

@@ -21,12 +21,4 @@ export class TelemetryManager {
         return this.events.length
     }
 
-    printSummary() {
-        console.log('Telemetry Summary')
-        console.log('Session:')
-        console.log(this.sessionId)
-        console.log('Events:')
-        console.log(this.count())
-    }
-
 }
