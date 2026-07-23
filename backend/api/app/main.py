@@ -2,6 +2,7 @@ from fastapi import FastAPI
 
 from app.core.config import settings
 from app.core.logging import setup_logging, logger
+from app.api.router import api_router
 
 setup_logging()
 
@@ -10,6 +11,8 @@ app = FastAPI(
     version=settings.api_version,
     debug=settings.debug
 )
+
+app.include_router(api_router)
 
 
 @app.on_event("startup")
