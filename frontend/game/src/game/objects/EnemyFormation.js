@@ -39,4 +39,29 @@ export class EnemyFormation {
         }
 
     }
+    update(delta) {
+        let leftMost = Infinity
+        let rightMost = -Infinity
+        for (const enemy of this.enemies) {
+            leftMost = Math.min(leftMost, enemy.sprite.x)
+            rightMost = Math.max(rightMost, enemy.sprite.x)
+        }
+        if (rightMost >= GAME_CONFIG.SCREEN_WIDTH - 20 && this.enemyDirection === 1) {
+            this.enemyDirection = -1
+            for (const enemy of this.enemies) {
+                enemy.sprite.y += this.enemyStepDown
+            }
+        }
+
+        if (leftMost <= 20 && this.enemyDirection === -1) {
+            this.enemyDirection = 1
+            for (const enemy of this.enemies) {
+                enemy.sprite.y += this.enemyStepDown
+            }
+        }
+        const distance = this.enemySpeed * (delta / 1000)
+        for (const enemy of this.enemies) {
+            enemy.sprite.x += distance * this.enemyDirection
+        }
+    }
 }

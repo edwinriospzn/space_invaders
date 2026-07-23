@@ -11,9 +11,6 @@ export class GameScene extends Phaser.Scene {
         super('GameScene')
 
         this.frameCount = 0
-        this.enemyDirection = 1
-        this.enemySpeed = GAME_CONFIG.FORMATION_SPEED
-        this.enemyStepDown = 20
         this.gameFinished = false
         this.endGameText = null
     }
@@ -48,32 +45,6 @@ export class GameScene extends Phaser.Scene {
             () => this.gameOver()
         )
         this.enemyFormation = new EnemyFormation(this)
-    }
-
-    moveEnemies(delta) {
-        let leftMost = Infinity
-        let rightMost = -Infinity
-        for (const enemy of this.enemyFormation.enemies) {
-            leftMost = Math.min(leftMost, enemy.sprite.x)
-            rightMost = Math.max(rightMost, enemy.sprite.x)
-        }
-        if (rightMost >= GAME_CONFIG.SCREEN_WIDTH - 20 && this.enemyDirection === 1) {
-            this.enemyDirection = -1
-            for (const enemy of this.enemyFormation.enemies) {
-                enemy.sprite.y += this.enemyStepDown
-            }
-        }
-
-        if (leftMost <= 20 && this.enemyDirection === -1) {
-            this.enemyDirection = 1
-            for (const enemy of this.enemyFormation.enemies) {
-                enemy.sprite.y += this.enemyStepDown
-            }
-        }
-        const distance = this.enemySpeed * (delta / 1000)
-        for (const enemy of this.enemyFormation.enemies) {
-            enemy.sprite.x += distance * this.enemyDirection
-        }
     }
 
     checkCollisions() {
@@ -141,7 +112,7 @@ export class GameScene extends Phaser.Scene {
         }
         this.frameCount++
         this.player.update(delta)
-        this.moveEnemies(delta)
+        this.enemyFormation.update(delta)
         this.checkCollisions()
         this.enemyFormation.enemies = this.enemyFormation.enemies.filter(enemy => !enemy.destroyed)
         this.checkVictory()
