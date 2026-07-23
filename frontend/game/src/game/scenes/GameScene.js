@@ -32,9 +32,6 @@ export class GameScene extends Phaser.Scene {
         this.spaceKey = this.input.keyboard.addKey(
             Phaser.Input.Keyboard.KeyCodes.SPACE
         )
-        this.restartKey = this.input.keyboard.addKey(
-            Phaser.Input.Keyboard.KeyCodes.R
-        )
         this.player = new Player(this)
         this.scoreManager = new ScoreManager(this)
         this.timerManager = new TimerManager(
@@ -71,10 +68,9 @@ export class GameScene extends Phaser.Scene {
 
     update(time, delta) {
 
+        this.gameStateManager.update()
+
         if (this.gameStateManager.isGameFinished()) {
-            if (Phaser.Input.Keyboard.JustDown(this.restartKey)) {
-                this.scene.restart()
-            }
             return
         }
 

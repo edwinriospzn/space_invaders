@@ -1,9 +1,26 @@
+import Phaser from 'phaser'
+
 export class GameStateManager {
 
     constructor(scene) {
         this.scene = scene
         this.gameFinished = false
         this.endGameText = null
+        this.restartKey = scene.input.keyboard.addKey(
+            Phaser.Input.Keyboard.KeyCodes.R
+        )
+    }
+
+    update() {
+
+        if (!this.isGameFinished()) {
+            return
+        }
+
+        if (Phaser.Input.Keyboard.JustDown(this.restartKey)) {
+            this.scene.scene.restart()
+        }
+
     }
     isGameFinished() {
         return this.gameFinished
