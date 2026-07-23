@@ -1,4 +1,6 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 
 from app.core.config import settings
 from app.core.logging import setup_logging, logger
@@ -13,6 +15,33 @@ app = FastAPI(
 )
 
 app.include_router(api_router)
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    logger.warning("Invalid request payload: %s", exc.errors())
+    return JSONResponse(
+        status_code=422,
+        content={"error": "Invalid telemetry payload"}
+    )
+
+
+@app.exception_handler(ValueError)
+async def value_error_handler(request: Request, exc: ValueError):
+    logger.warning("Invalid request: %s", str(exc))
+    return JSONResponse(
+        status_code=400,
+        content={"error": str(exc)}
+    )
+
+
+@app.exception_handler(Exception)
+async def unhandled_exception_handler(request: Request, exc: Exception):
+    logger.exception("Unhandled exception")
+    return JSONResponse(
+        status_code=500,
+        content={"error": "Internal server error"}
+    )
 
 
 @app.on_event("startup")
