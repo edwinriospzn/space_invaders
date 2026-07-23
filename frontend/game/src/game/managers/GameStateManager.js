@@ -27,4 +27,24 @@ export class GameStateManager {
     showMessage(message) {
         this.showEndGameMessage(message)
     }
+    gameOver() {
+        if (this.isGameFinished()) {
+            return
+        }
+        this.setGameFinished(true)
+        this.scene.timerManager.stop()
+        this.showMessage("GAME OVER")
+        console.log("GAME OVER!")
+    }
+    checkVictory() {
+        if (this.isGameFinished()) {
+            return
+        }
+        if (this.scene.enemyFormation.getAliveCount() === 0) {
+            this.setGameFinished(true)
+            this.scene.timerManager.stop()
+            this.showMessage("YOU WIN!")
+            console.log("YOU WIN!")
+        }
+    }
 }

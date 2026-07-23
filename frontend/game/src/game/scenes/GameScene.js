@@ -39,7 +39,7 @@ export class GameScene extends Phaser.Scene {
         this.scoreManager = new ScoreManager(this)
         this.timerManager = new TimerManager(
             this,
-            () => this.gameOver()
+            () => this.gameStateManager.gameOver()
         )
         this.enemyFormation = new EnemyFormation(this)
     }
@@ -67,26 +67,7 @@ export class GameScene extends Phaser.Scene {
         )
     }
 
-    checkVictory() {
-        if (this.gameStateManager.isGameFinished()) {
-            return
-        }
-        if (this.enemyFormation.getAliveCount() === 0) {
-            this.gameStateManager.setGameFinished(true)
-            this.timerManager.stop()
-            this.gameStateManager.showMessage("YOU WIN!")
-            console.log("YOU WIN!")
-        }
-    }
-    gameOver() {
-        if (this.gameStateManager.isGameFinished()) {
-            return
-        }
-        this.gameStateManager.setGameFinished(true)
-        this.timerManager.stop()
-        this.gameStateManager.showMessage("GAME OVER")
-        console.log("GAME OVER!")
-    }
+
 
     update(time, delta) {
 
@@ -107,7 +88,7 @@ export class GameScene extends Phaser.Scene {
 
         this.enemyFormation.removeDestroyedEnemies()
 
-        this.checkVictory()
+        this.gameStateManager.checkVictory()
 
         if (this.frameCount % 120 === 0) {
             console.log(`Frame: ${this.frameCount}`)
