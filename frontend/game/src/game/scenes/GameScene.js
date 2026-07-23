@@ -6,6 +6,7 @@ import { TimerManager } from '../managers/TimerManager'
 import { GAME_CONFIG } from '../config/gameConstants.js'
 import { EnemyFormation } from '../objects/EnemyFormation'
 import { GameStateManager } from '../managers/GameStateManager'
+import { CollisionManager } from '../managers/CollisionManager'
 
 export class GameScene extends Phaser.Scene {
     constructor() {
@@ -27,7 +28,6 @@ export class GameScene extends Phaser.Scene {
 
     create() {
         console.log('BootScene: create')
-        this.gameStateManager = new GameStateManager(this)
 
         this.spaceKey = this.input.keyboard.addKey(
             Phaser.Input.Keyboard.KeyCodes.SPACE
@@ -39,6 +39,8 @@ export class GameScene extends Phaser.Scene {
             () => this.gameStateManager.gameOver()
         )
         this.enemyFormation = new EnemyFormation(this)
+        this.collisionManager = new CollisionManager(this)
+        this.gameStateManager = new GameStateManager(this)
     }
 
     checkCollisions() {
