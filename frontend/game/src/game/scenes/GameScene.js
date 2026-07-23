@@ -3,7 +3,6 @@ import { Player } from '../objects/Player'
 import { Enemy } from '../objects/Enemy'
 import { ScoreManager } from '../managers/ScoreManager'
 import { TimerManager } from '../managers/TimerManager'
-import { GAME_CONFIG } from '../config/gameConstants.js'
 import { EnemyFormation } from '../objects/EnemyFormation'
 import { GameStateManager } from '../managers/GameStateManager'
 import { CollisionManager } from '../managers/CollisionManager'
@@ -43,20 +42,6 @@ export class GameScene extends Phaser.Scene {
         this.gameStateManager = new GameStateManager(this)
     }
 
-    checkCollisions() {
-        for (const bullet of this.player.bullets) {
-            for (const enemy of this.enemyFormation.getEnemies()) {
-                if (!this.collisionManager.isColliding(bullet, enemy)) {
-                    continue
-                }
-                bullet.destroy()
-                enemy.destroy()
-                this.scoreManager.addPoints(GAME_CONFIG.ENEMY_POINTS)
-                return
-            }
-        }
-    }
-
 
 
     update(time, delta) {
@@ -73,7 +58,7 @@ export class GameScene extends Phaser.Scene {
 
         this.enemyFormation.update(delta)
 
-        this.checkCollisions()
+        this.collisionManager.update()
 
         this.enemyFormation.removeDestroyedEnemies()
 
