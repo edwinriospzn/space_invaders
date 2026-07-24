@@ -3,3 +3,5 @@ uvicorn
 python-dotenv
 pytest
 httpx
+sqlalchemy
+psycopg2-binary
