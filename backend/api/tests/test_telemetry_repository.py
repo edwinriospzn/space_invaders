@@ -34,10 +34,10 @@ def test_event_insertion(db_session):
         make_event("PLAYER_SHOT", "session-2", "2026-07-24T10:00:01.000Z", {"x": 1})
     )
 
-    events = db_session.query(TelemetryEventModel).all()
-    assert len(events) == 1
-    assert events[0].event_type == "PLAYER_SHOT"
-    assert events[0].payload == {"x": 1}
+    session = db_session.query(SessionModel).filter_by(session_uuid="session-2").first()
+    assert len(session.telemetry_events) == 1
+    assert session.telemetry_events[0].event_type == "PLAYER_SHOT"
+    assert session.telemetry_events[0].payload == {"x": 1}
 
 
 def test_batch_insert(db_session):
@@ -51,8 +51,8 @@ def test_batch_insert(db_session):
 
     repository.save_many(events)
 
-    stored = db_session.query(TelemetryEventModel).all()
-    assert len(stored) == 3
+    session = db_session.query(SessionModel).filter_by(session_uuid="session-3").first()
+    assert len(session.telemetry_events) == 3
 
 
 def test_queries_return_all_events(db_session):
@@ -70,12 +70,19 @@ def test_queries_return_all_events(db_session):
         ]
     )
 
-    events = repository.get_all()
-    assert {event.event_type for event in events} == {"GAME_START", "GAME_END"}
-
     session = db_session.query(SessionModel).filter_by(session_uuid="session-4").first()
+    assert {event.event_type for event in session.telemetry_events} == {
+        "GAME_START",
+        "GAME_END",
+    }
     assert session.score == 42
     assert session.result == "WIN"
+
+    all_events = repository.get_all()
+    assert any(
+        event.session_id == session.id and event.event_type == "GAME_END"
+        for event in all_events
+    )
 
 
 def test_save_many_rolls_back_on_error(db_session):
@@ -88,4 +95,3 @@ def test_save_many_rolls_back_on_error(db_session):
             )
 
     assert db_session.query(SessionModel).filter_by(session_uuid="session-5").first() is None
-    assert db_session.query(TelemetryEventModel).count() == 0

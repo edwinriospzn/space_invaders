@@ -1,19 +1,17 @@
 import pytest
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, event
 from sqlalchemy.orm import sessionmaker
 
 from app.core.config import settings
-from app.database.base import Base
-from app.database.models.session import Session  # noqa: F401
-from app.database.models.telemetry_event import TelemetryEvent  # noqa: F401
 
 
 @pytest.fixture(scope="session")
 def engine():
+    # Schema is owned by Alembic migrations (see backend/api/alembic/), so
+    # tests only connect to an already-migrated database, they don't
+    # create or drop schema themselves.
     engine = create_engine(settings.database_url)
-    Base.metadata.create_all(engine)
     yield engine
-    Base.metadata.drop_all(engine)
     engine.dispose()
 
 
@@ -23,6 +21,14 @@ def db_session(engine):
     transaction = connection.begin()
     TestSessionLocal = sessionmaker(bind=connection)
     session = TestSessionLocal()
+
+    nested = connection.begin_nested()
+
+    @event.listens_for(session, "after_transaction_end")
+    def restart_savepoint(session, transaction):
+        nonlocal nested
+        if not nested.is_active:
+            nested = connection.begin_nested()
 
     yield session
 
