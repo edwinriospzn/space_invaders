@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import List
 
+from sqlalchemy import insert
 from sqlalchemy.orm import Session as DBSession
 
 from app.database.models.session import Session
@@ -17,24 +18,30 @@ class TelemetryRepository:
         self.save_many([event])
 
     def save_many(self, events: List[TelemetryEvent]):
-        for event in events:
-            timestamp = self._parse_timestamp(event.timestamp)
-            session = self._get_or_create_session(event.sessionId, timestamp)
+        event_rows = []
 
-            if event.eventType == "GAME_END":
-                session.ended_at = timestamp
-                session.score = event.payload.get("score")
-                session.result = event.payload.get("result")
+        try:
+            for event in events:
+                timestamp = self._parse_timestamp(event.timestamp)
+                session = self._get_or_create_session(event.sessionId, timestamp)
 
-            self.db.add(
-                TelemetryEventModel(
-                    session_id=session.id,
-                    event_type=event.eventType,
-                    timestamp=timestamp,
-                    payload=event.payload,
-                )
-            )
-        self.db.commit()
+                if event.eventType == "GAME_END":
+                    session.ended_at = timestamp
+                    session.score = event.payload.get("score")
+                    session.result = event.payload.get("result")
+
+                event_rows.append({
+                    "session_id": session.id,
+                    "event_type": event.eventType,
+                    "timestamp": timestamp,
+                    "payload": event.payload,
+                })
+
+            self.db.execute(insert(TelemetryEventModel), event_rows)
+            self.db.commit()
+        except Exception:
+            self.db.rollback()
+            raise
 
     def get_all(self) -> List[TelemetryEventModel]:
         return self.db.query(TelemetryEventModel).all()
