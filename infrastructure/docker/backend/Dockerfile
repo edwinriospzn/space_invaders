@@ -10,6 +10,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-EXPOSE 8000
+ENV API_PORT=8000
 
-ENTRYPOINT ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+EXPOSE ${API_PORT}
+
+ENTRYPOINT uvicorn app.main:app --host 0.0.0.0 --port ${API_PORT}
