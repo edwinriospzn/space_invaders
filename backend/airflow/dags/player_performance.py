@@ -1,10 +1,27 @@
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 from airflow.sdk import DAG, task
 
 logger = logging.getLogger(__name__)
+
+
+def notify_failure(context):
+    logger.error(
+        "Task failed: dag_id=%s task_id=%s run_id=%s exception=%s",
+        context["dag"].dag_id,
+        context["task_instance"].task_id,
+        context["run_id"],
+        context.get("exception"),
+    )
+
+
+default_args = {
+    "retries": 2,
+    "retry_delay": timedelta(minutes=5),
+    "on_failure_callback": notify_failure,
+}
 
 
 @task
@@ -65,6 +82,16 @@ with DAG(
     start_date=datetime(2026, 1, 1),
     schedule="@hourly",
     catchup=False,
+    default_args=default_args,
     tags=["sprint-4", "etl"],
 ) as dag:
+    dag.doc_md = """
+    ### Player Performance
+
+    Computes player KPIs (avg/max score, avg session duration, avg shots
+    fired, avg enemies destroyed) into `analytics.player_performance`.
+
+    Retries twice with a 5 minute delay between attempts. On failure,
+    `notify_failure` logs the dag/task/run and exception (log only for now).
+    """
     create_player_performance_table() >> build_player_performance()
