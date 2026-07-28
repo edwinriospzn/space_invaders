@@ -1,0 +1,37 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: space_invaders_postgres
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - space_invaders
+
+  api:
+    build:
+      context: ../../backend/api
+      dockerfile: ../../infrastructure/docker/backend/Dockerfile
+    container_name: space_invaders_api
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+    ports:
+      - "${API_PORT}:${API_PORT}"
+    depends_on:
+      - postgres
+    networks:
+      - space_invaders
+
+networks:
+  space_invaders:
+    name: space_invaders
+
+volumes:
+  postgres_data:
