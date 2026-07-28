@@ -62,7 +62,7 @@ with DAG(
     dag_id="daily_session_metrics",
     description="Extracts sessions/telemetry_events, transforms duration/score/event_count, and loads analytics.daily_sessions.",
     start_date=datetime(2026, 1, 1),
-    schedule=None,
+    schedule="@hourly",
     catchup=False,
     tags=["sprint-4", "etl"],
 ) as dag:

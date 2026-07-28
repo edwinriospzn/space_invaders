@@ -63,7 +63,7 @@ with DAG(
     dag_id="player_performance",
     description="Computes player KPIs (avg/max score, avg session duration, avg shots fired, avg enemies destroyed) into analytics.player_performance.",
     start_date=datetime(2026, 1, 1),
-    schedule=None,
+    schedule="@hourly",
     catchup=False,
     tags=["sprint-4", "etl"],
 ) as dag:

@@ -46,7 +46,7 @@ with DAG(
     dag_id="event_statistics",
     description="Aggregates telemetry_events by event_date and event_type into analytics.event_statistics.",
     start_date=datetime(2026, 1, 1),
-    schedule=None,
+    schedule="@hourly",
     catchup=False,
     tags=["sprint-4", "etl"],
 ) as dag:

@@ -18,7 +18,7 @@ with DAG(
     dag_id="extract_telemetry",
     description="Reads telemetry_events from PostgreSQL and prints the row count.",
     start_date=datetime(2026, 1, 1),
-    schedule=None,
+    schedule="@hourly",
     catchup=False,
     tags=["sprint-4", "extract"],
 ) as dag:

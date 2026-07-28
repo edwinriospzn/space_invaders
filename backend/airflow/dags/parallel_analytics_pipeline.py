@@ -37,6 +37,28 @@ def extract():
 
 
 @task
+def validate_data_quality(extracted):
+    session_rows = extracted["session_rows"]
+    event_rows = extracted["event_rows"]
+
+    assert len(session_rows) > 0, "Data quality check failed: sessions must exist"
+
+    for session_id, started_at, ended_at, score, event_count in session_rows:
+        assert score is None or score >= 0, f"Data quality check failed: negative score for session {session_id}"
+
+    for event_date, event_type, total_events in event_rows:
+        assert event_type is not None, "Data quality check failed: null event type"
+        assert event_date is not None, "Data quality check failed: event timestamp required"
+
+    logger.info(
+        "Data quality checks passed: %s session rows, %s event rows",
+        len(session_rows),
+        len(event_rows),
+    )
+    return extracted
+
+
+@task
 def session_etl(extracted):
     records = []
     for session_id, started_at, ended_at, score, event_count in extracted["session_rows"]:
@@ -108,9 +130,9 @@ with DAG(
     dag_id="parallel_analytics_pipeline",
     description="Runs session and event ETL branches in parallel after a shared extract, then validates both loads.",
     start_date=datetime(2026, 1, 1),
-    schedule=None,
+    schedule="@hourly",
     catchup=False,
     tags=["sprint-4", "etl"],
 ) as dag:
-    extracted = extract()
-    validate(session_etl(extracted), event_etl(extracted))
+    validated = validate_data_quality(extract())
+    validate(session_etl(validated), event_etl(validated))
