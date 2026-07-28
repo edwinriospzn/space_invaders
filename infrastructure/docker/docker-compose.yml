@@ -28,6 +28,8 @@ x-airflow-common:
     - space_invaders
   depends_on:
     &airflow-common-depends-on
+    postgres:
+      condition: service_healthy
     airflow-postgres:
       condition: service_healthy
 
@@ -42,6 +44,12 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
     networks:
       - space_invaders
 
@@ -58,7 +66,8 @@ services:
     ports:
       - "${API_PORT}:${API_PORT}"
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     networks:
       - space_invaders
 
@@ -73,7 +82,8 @@ services:
     ports:
       - "${FRONTEND_PORT:-8081}:80"
     depends_on:
-      - api
+      api:
+        condition: service_healthy
     networks:
       - space_invaders
 
