@@ -2,6 +2,78 @@
 
 How to build and run each containerized component of the platform.
 
+## Running the Full Platform (Docker Compose)
+
+`infrastructure/docker/docker-compose.yml` orchestrates the whole stack — Postgres, FastAPI, the frontend, and Airflow (its own metadata Postgres, scheduler, dag-processor, triggerer, and API server) — on one shared `space_invaders` Docker network.
+
+**Prerequisites**
+
+- Docker Engine with the Compose plugin (`docker compose version`).
+- Nothing else already bound to ports `5432`, `8000`, `8081`, `8080` on the host (or override `API_PORT` / `FRONTEND_PORT` / `AIRFLOW_PORT` in `.env` — see below).
+- `infrastructure/docker/.env` present (already checked in). It holds every configurable value — Postgres credentials, service ports, Airflow secrets — so the stack can be reconfigured without touching `docker-compose.yml`.
+
+**Build**
+
+```bash
+cd infrastructure/docker
+docker compose build
+```
+
+Builds the `api`, `frontend`, and Airflow images. `postgres` and `airflow-postgres` use upstream images and don't need building.
+
+**Startup**
+
+```bash
+docker compose up -d
+```
+
+`depends_on` + health checks enforce the correct order automatically: `postgres` and `airflow-postgres` start first; `api` waits for `postgres` to be healthy; `frontend` waits for `api` to be healthy; every Airflow service waits for `airflow-init`, which itself waits for both Postgres instances to be healthy. Once it settles:
+
+- Game: http://localhost:8081 (or `${FRONTEND_PORT}`)
+- API / Swagger: http://localhost:8000/docs (or `${API_PORT}`)
+- Airflow UI: http://localhost:8080 (or `${AIRFLOW_PORT}`), login `airflow` / `airflow` (from `_AIRFLOW_WWW_USER_USERNAME` / `_AIRFLOW_WWW_USER_PASSWORD`)
+
+**Shutdown**
+
+```bash
+docker compose down
+```
+
+Stops and removes containers, but named volumes (`postgres_data`, `airflow_postgres_data`) are preserved — your data survives.
+
+**Logs**
+
+```bash
+docker compose logs -f            # every service, follow mode
+docker compose logs -f api        # just one service
+```
+
+**Rebuild**
+
+After changing a Dockerfile or dependency list (source-code edits alone don't need this — `api` and `frontend` bind-mount their source and reload/HMR automatically, see below):
+
+```bash
+docker compose up -d --build
+```
+
+**Reset database**
+
+```bash
+docker compose down -v
+```
+
+The `-v` flag deletes the named volumes, wiping both the app's Postgres data and Airflow's metadata database. Follow with `docker compose up -d` to start clean (Airflow's `airflow-init` will re-run migrations and recreate the admin user).
+
+**Useful commands**
+
+| Command | Purpose |
+| --- | --- |
+| `docker compose up` | Start the stack (add `-d` to run in the background) |
+| `docker compose down` | Stop and remove containers (keeps volumes) |
+| `docker compose logs` | View service logs (add `-f` to follow, or a service name to filter) |
+| `docker compose ps` | List running services and their health status |
+| `docker compose build` | (Re)build the `api`, `frontend`, and Airflow images |
+
 ## Frontend (Phaser game)
 
 - Dockerfile: `infrastructure/docker/frontend/Dockerfile`
