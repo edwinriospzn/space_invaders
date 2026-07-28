@@ -65,6 +65,9 @@ services:
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
     ports:
       - "${API_PORT}:${API_PORT}"
+    volumes:
+      - ../../backend/api:/app
+    entrypoint: sh -c "pip install --no-cache-dir watchfiles && uvicorn app.main:app --host 0.0.0.0 --port ${API_PORT} --reload"
     depends_on:
       postgres:
         condition: service_healthy
@@ -72,15 +75,17 @@ services:
       - space_invaders
 
   frontend:
-    build:
-      context: ../../frontend/game
-      dockerfile: ../../infrastructure/docker/frontend/Dockerfile
-      args:
-        VITE_API_URL: http://localhost:${API_PORT}
+    image: node:20-alpine
+    working_dir: /app
     container_name: space_invaders_frontend
     restart: unless-stopped
+    environment:
+      VITE_API_URL: http://localhost:${API_PORT}
+    volumes:
+      - ../../frontend/game:/app
+    command: sh -c "npm ci && npm run dev -- --host 0.0.0.0 --port ${FRONTEND_PORT:-8081}"
     ports:
-      - "${FRONTEND_PORT:-8081}:80"
+      - "${FRONTEND_PORT:-8081}:${FRONTEND_PORT:-8081}"
     depends_on:
       api:
         condition: service_healthy
