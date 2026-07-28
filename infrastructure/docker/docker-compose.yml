@@ -62,6 +62,21 @@ services:
     networks:
       - space_invaders
 
+  frontend:
+    build:
+      context: ../../frontend/game
+      dockerfile: ../../infrastructure/docker/frontend/Dockerfile
+      args:
+        VITE_API_URL: http://localhost:${API_PORT}
+    container_name: space_invaders_frontend
+    restart: unless-stopped
+    ports:
+      - "${FRONTEND_PORT:-8081}:80"
+    depends_on:
+      - api
+    networks:
+      - space_invaders
+
   airflow-postgres:
     image: postgres:16
     container_name: airflow_postgres
