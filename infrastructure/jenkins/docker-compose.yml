@@ -10,6 +10,27 @@ services:
       - "50000:50000"
     volumes:
       - jenkins_home:/var/jenkins_home
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # Test database the backend pytest suite runs against (see Jenkinsfile's
+  # "pytest" stage) — separate from the app's own Postgres in
+  # infrastructure/docker/, so CI runs never touch real data.
+  postgres:
+    image: postgres:17
+    container_name: jenkins_test_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: space_invaders
+      POSTGRES_PASSWORD: space_invaders
+      POSTGRES_DB: space_invaders
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "space_invaders"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
 
 volumes:
   jenkins_home:
