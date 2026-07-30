@@ -10,6 +10,13 @@ services:
       - "50000:50000"
     volumes:
       - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+    # Grants the `jenkins` user access to the bind-mounted Docker socket
+    # without running the container as root. Set DOCKER_GID to the host's
+    # `docker` group gid (`getent group docker | cut -d: -f3`) — it varies
+    # per host, so there's no safe default to bake in.
+    group_add:
+      - "${DOCKER_GID}"
     depends_on:
       postgres:
         condition: service_healthy

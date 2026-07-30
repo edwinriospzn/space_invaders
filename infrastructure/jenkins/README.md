@@ -6,7 +6,8 @@ How the `Jenkinsfile` at the repo root builds, tests, and validates the Space In
 
 - Docker Engine with the Compose plugin (`docker compose version`) on the host running Jenkins.
 - Nothing else already bound to host ports `8090` (Jenkins UI) or `50000` (agent JNLP) — or override the port mapping in `infrastructure/jenkins/docker-compose.yml`.
-- The pipeline's `docker build` / `docker compose` stages run as shell steps directly on the Jenkins controller (`agent any`), so the controller itself needs a `docker` CLI and access to a Docker daemon. The current `infrastructure/jenkins/Dockerfile` does **not** install the Docker CLI or mount `/var/run/docker.sock`, so those stages will fail with `docker: command not found` until you add both to the Jenkins image/Compose service (see Troubleshooting below).
+- The pipeline's `docker build` / `docker compose` stages run as shell steps directly on the Jenkins controller (`agent any`), so the controller image bundles the Docker CLI and Compose plugin (copied in from `docker:27-cli` and the official Compose release binary — see the `Dockerfile`), and `docker-compose.yml` bind-mounts the host's `/var/run/docker.sock` into the container so those commands reach the host's real Docker daemon.
+- The `jenkins` user needs group access to that socket. Set `DOCKER_GID` to the host's `docker` group gid before starting the stack: `export DOCKER_GID=$(getent group docker | cut -d: -f3)`. This is host-specific (there's no safe default to bake in), so `docker compose up` without it will fail — see Troubleshooting.
 - Nothing already bound to the ports the platform stack itself needs while `docker compose up` runs during a build: `5432`, `8000`, `8081`, `8080` (see `infrastructure/docker/README.md`).
 
 ## Jenkins setup
@@ -15,10 +16,11 @@ How the `Jenkinsfile` at the repo root builds, tests, and validates the Space In
 
    ```bash
    cd infrastructure/jenkins
+   export DOCKER_GID=$(getent group docker | cut -d: -f3)
    docker compose up -d --build
    ```
 
-   This builds `space-invaders-jenkins` from the `Dockerfile` (`jenkins/jenkins:lts-jdk17` + `python3`/`pip`, since the `Backend Tests` and `Run API Tests` stages run Python directly on the controller) and starts two containers:
+   This builds `space-invaders-jenkins` from the `Dockerfile` (`jenkins/jenkins:lts-jdk17` + `python3`/`pip`, since the `Backend Tests` and `Run API Tests` stages run Python directly on the controller, plus the Docker CLI and Compose plugin for the `docker build`/`docker compose` stages) and starts two containers:
    - `space_invaders_jenkins` — the controller, UI on http://localhost:8090.
    - `jenkins_test_postgres` — an isolated Postgres instance the pipeline's unit-test stage (`Backend Tests`) runs against, kept separate from the app's own Postgres in `infrastructure/docker/` so CI never touches real data.
 
@@ -77,8 +79,8 @@ After the stages, the `post` block runs regardless of outcome: it always tears t
 
 ## Troubleshooting
 
-- **`docker: command not found` in a `Build * Image` / `docker compose up` / `Shutdown` stage**: the Jenkins controller image doesn't currently ship the Docker CLI. Install it in `infrastructure/jenkins/Dockerfile` (e.g. `apt-get install docker-ce-cli` or copy the static `docker` binary) and give the controller access to a Docker daemon — typically by bind-mounting the host's socket (`/var/run/docker.sock:/var/run/docker.sock`) in `infrastructure/jenkins/docker-compose.yml`.
-- **`permission denied` connecting to the Docker socket**: the `jenkins` user inside the container needs to be in the same group as the mounted socket (usually `docker`, gid varies by host) — add the group and user in the `Dockerfile`, or run the container with `--group-add`/matching GID.
+- **`docker: command not found` in a `Build * Image` / `docker compose up` / `Shutdown` stage**: the image was built before the Docker CLI was added, or the build cache served a stale layer — rebuild with `docker compose build --no-cache`.
+- **`permission denied` connecting to the Docker socket** (`Got permission denied while trying to connect to the Docker daemon socket`): `DOCKER_GID` wasn't set (or was set to the wrong value) when the container was started, so the `jenkins` user isn't in the socket's group. Run `getent group docker | cut -d: -f3` on the host, `export DOCKER_GID=<that value>`, and recreate the container (`docker compose up -d`) — `group_add` is only applied at container creation, so an existing running container needs to be recreated, not just restarted.
 - **`Backend Tests` fails with a connection error to Postgres**: `jenkins_test_postgres` isn't healthy yet or isn't reachable. Check `docker compose -f infrastructure/jenkins/docker-compose.yml ps` and `docker compose -f infrastructure/jenkins/docker-compose.yml logs postgres` — the stage's `DATABASE_URL` (`postgres:5432`, set at the pipeline level) only resolves if the Jenkins controller is on the same Compose network as that Postgres container.
 - **`docker compose up` stage times out waiting for services to become healthy**: check `docker compose -f infrastructure/docker/docker-compose.yml logs` for the specific service — most often `airflow-init` failing (see `infrastructure/docker/README.md`'s own troubleshooting section) or a port already bound on the host.
 - **`Run Health Checks` fails even though `docker compose up` succeeded**: a service can report "healthy" and still not be reachable from the controller's shell if it's on a different network namespace than expected — rerun `docker compose ps` inside `infrastructure/docker/` to confirm the port mappings (`8000`, `8080`) are actually published to the host.
