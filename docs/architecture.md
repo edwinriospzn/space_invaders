@@ -112,5 +112,6 @@ session_etl()   event_etl()      ← run in parallel (both depend only on valida
 ## Where to look next
 
 - `infrastructure/docker/README.md` — how to build/run/troubleshoot each container and the full Compose stack.
+- `infrastructure/jenkins/README.md` — how the CI pipeline (`Jenkinsfile`) builds, tests, and validates the platform, and how to run/troubleshoot it.
 - `backend/airflow/dags/` — the DAG source files described above.
 - `backend/api/app/api/routes/telemetry.py` — the ingest endpoint the frontend posts to.
