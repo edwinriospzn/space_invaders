@@ -14,13 +14,15 @@ spec:
           envFrom:
             - configMapRef:
                 name: airflow-config
+            - secretRef:
+                name: airflow-secret
           command: ["/bin/bash", "-c"]
           args:
             - |
               airflow db migrate
               airflow users create \
-                --username airflow \
-                --password airflow \
+                --username "$AIRFLOW_WWW_USER_USERNAME" \
+                --password "$AIRFLOW_WWW_USER_PASSWORD" \
                 --firstname airflow \
                 --lastname airflow \
                 --role Admin \

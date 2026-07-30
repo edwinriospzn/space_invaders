@@ -20,9 +20,15 @@ spec:
           imagePullPolicy: IfNotPresent
           env:
             - name: POSTGRES_USER
-              value: airflow
+              valueFrom:
+                secretKeyRef:
+                  name: airflow-postgres-secret
+                  key: POSTGRES_USER
             - name: POSTGRES_PASSWORD
-              value: airflow
+              valueFrom:
+                secretKeyRef:
+                  name: airflow-postgres-secret
+                  key: POSTGRES_PASSWORD
             - name: POSTGRES_DB
               value: airflow
           ports:

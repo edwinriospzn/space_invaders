@@ -22,3 +22,5 @@ spec:
           envFrom:
             - configMapRef:
                 name: airflow-config
+            - secretRef:
+                name: airflow-secret
