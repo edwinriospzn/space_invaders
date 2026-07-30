@@ -120,13 +120,13 @@ pipeline {
             steps {
                 dir('infrastructure/docker') {
                     retry(3) {
-                        sh 'curl --fail http://localhost:8000/health'
+                        sh 'curl --fail http://host.docker.internal:8000/health'
                     }
                     retry(3) {
                         sh 'docker compose exec -T postgres pg_isready -U space_invaders'
                     }
                     retry(3) {
-                        sh 'curl --fail http://localhost:8080/api/v2/monitor/health'
+                        sh 'curl --fail http://host.docker.internal:8080/api/v2/monitor/health'
                     }
                 }
             }
@@ -134,7 +134,7 @@ pipeline {
 
         stage('Run API Tests') {
             environment {
-                DATABASE_URL = 'postgresql://space_invaders:space_invaders@localhost:5432/space_invaders'
+                DATABASE_URL = 'postgresql://space_invaders:space_invaders@host.docker.internal:5432/space_invaders'
             }
             options {
                 timeout(time: 10, unit: 'MINUTES')

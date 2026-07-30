@@ -17,6 +17,13 @@ services:
     # per host, so there's no safe default to bake in.
     group_add:
       - "${DOCKER_GID}"
+    # `docker compose up` in the Jenkinsfile talks to the *host's* Docker
+    # daemon via the socket mount above (DooD), so it publishes the app
+    # stack's ports on the host's network interfaces, not this container's.
+    # `localhost` inside this container is its own loopback, where nothing
+    # is listening — reach published ports via the host gateway instead.
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       postgres:
         condition: service_healthy
