@@ -1,0 +1,33 @@
+# CI-only override for docker-compose.yml, used by the Jenkinsfile's
+# "docker compose up" stage:
+#
+#   docker compose -f docker-compose.yml -f docker-compose.ci.yml up -d --build --wait
+#
+# The base file's `api`/`frontend` services bind-mount live source
+# (../../backend/api, ../../frontend/game) for local hot-reload. Jenkins runs
+# `docker compose` against the *host's* Docker daemon via a bind-mounted
+# socket (Docker-outside-of-Docker), not its own filesystem, so those
+# relative bind-mount paths resolve against the Jenkins container's
+# workspace and don't exist on the host — Docker silently mounts an empty
+# directory over /app instead, which is why `api` came up unhealthy in CI.
+#
+# This override drops the dev bind-mounts/entrypoint and runs each service
+# from its own built image instead, matching what a real deployment would
+# run. It has no effect on local development, since plain `docker compose
+# up` (no -f flags) never reads this file.
+services:
+  api:
+    volumes: !reset []
+    entrypoint: !reset null
+
+  frontend:
+    build:
+      context: ../../frontend/game
+      dockerfile: ../../infrastructure/docker/frontend/Dockerfile
+    image: !reset null
+    working_dir: !reset null
+    environment: !reset {}
+    volumes: !reset []
+    command: !reset null
+    ports: !override
+      - "${FRONTEND_PORT:-8081}:80"

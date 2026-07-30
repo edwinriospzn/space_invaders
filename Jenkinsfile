@@ -107,7 +107,7 @@ pipeline {
             steps {
                 retry(2) {
                     dir('infrastructure/docker') {
-                        sh 'docker compose up -d --build --wait --wait-timeout 300'
+                        sh 'docker compose -f docker-compose.yml -f docker-compose.ci.yml up -d --build --wait --wait-timeout 300'
                     }
                 }
             }
