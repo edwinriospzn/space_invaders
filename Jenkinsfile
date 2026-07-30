@@ -37,6 +37,24 @@ pipeline {
                 }
             }
         }
+
+        stage('Build Frontend Image') {
+            steps {
+                sh 'docker build -f infrastructure/docker/frontend/Dockerfile -t space-invaders-frontend:${BUILD_NUMBER} frontend/game'
+            }
+        }
+
+        stage('Build Backend Image') {
+            steps {
+                sh 'docker build -f infrastructure/docker/backend/Dockerfile -t space-invaders-api:${BUILD_NUMBER} backend/api'
+            }
+        }
+
+        stage('Build Airflow Image') {
+            steps {
+                sh 'docker build -f infrastructure/docker/airflow/Dockerfile -t space-invaders-airflow:${BUILD_NUMBER} infrastructure/docker/airflow'
+            }
+        }
     }
 
     post {
