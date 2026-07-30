@@ -28,6 +28,15 @@ pipeline {
                 }
             }
         }
+
+        stage('Frontend Build') {
+            steps {
+                dir('frontend/game') {
+                    sh 'npm ci'
+                    sh 'npm run build'
+                }
+            }
+        }
     }
 
     post {
