@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-config
+data:
+  API_PORT: "8000"
+  LOG_LEVEL: "INFO"
+  DATABASE_URL: "postgresql://space_invaders:space_invaders@postgres:5432/space_invaders"

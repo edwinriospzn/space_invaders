@@ -18,5 +18,8 @@ spec:
         - name: backend
           image: space-invaders-api:latest
           imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: backend-config
           ports:
             - containerPort: 8000
