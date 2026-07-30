@@ -31,6 +31,8 @@ The user has a real Jenkins controller running locally (`docker compose` in `inf
 
 Each fix was verified for real (not just read): rebuilt images, ran the exact merged Compose config, confirmed containers became healthy, curled the live endpoints, then tore everything down. The final `Jenkinsfile` was also validated directly against the user's real Jenkins instance via its `/pipeline-model-converter/validate` endpoint after every change.
 
+4. **DooD networking: `localhost` doesn't reach host-published ports** (`infrastructure/jenkins/docker-compose.yml`, `Jenkinsfile`) — surfaced in build #3, after fix #3 got `docker compose up` all the way to healthy. `Run Health Checks`' two `curl http://localhost:8000/health` / `:8080/api/v2/monitor/health` calls, and `Run API Tests`' `DATABASE_URL=...@localhost:5432/...`, all run as plain `sh` steps directly in the Jenkins controller container — not via `docker compose exec`. Since `docker compose up` talks to the **host's** daemon (DooD), those ports are published on the host's network interfaces, not the Jenkins container's; `localhost` inside the Jenkins container is its own loopback, where nothing listens. (The `pg_isready` check in the same stage worked because `docker compose exec` runs inside the target container's own network namespace, regardless of where the Docker client invocation originates.) Fixed by adding `extra_hosts: ["host.docker.internal:host-gateway"]` to the `jenkins` service, then pointing the two curls and the `DATABASE_URL` at `host.docker.internal` instead of `localhost`. Commit `091a4fa`.
+
 ## Known environment specifics (this user's machine)
 
 - Jenkins UI: **http://localhost:8090**. Login: username `admin`, password is whatever `docker exec space_invaders_jenkins cat /var/jenkins_home/secrets/initialAdminPassword` returns — the user chose "Continue as admin" in the setup wizard, so that initial password is the permanent one.
@@ -40,7 +42,11 @@ Each fix was verified for real (not just read): rebuilt images, ran the exact me
 
 ## Current status / next step
 
-Commit `b2e31ef` (the DooD fix) is pushed but **not yet confirmed green** in a full Jenkins run — the last known run (build #2) failed at `docker compose up` due to bug #3 above, before that fix existed. The immediate next step when resuming: trigger **Build Now** on the Jenkins job and confirm the full pipeline (`Checkout` → ... → `Shutdown`) goes green end-to-end, then check the Blue Ocean/console output and archived artifacts/test results to confirm stories 7.8–7.9 render as expected in the UI.
+**Confirmed green.** Build #4 (commit `091a4fa`) completed with `result: SUCCESS` in ~119s, every stage through `Shutdown` passed. Verified via the Jenkins REST API (no UI access needed): `testReport` shows 18/18 tests passed, 0 failed/skipped, across both the `Backend Tests` and `Run API Tests` JUnit suites (story 7.8's `junit` step); 75 artifacts archived under `backend/api/coverage-reports/**` and `frontend/game/dist/**` (story 7.8's `archiveArtifacts`).
+
+History: build #2 failed at `docker compose up` (bug #3, fixed by `b2e31ef`). Build #3 (after that fix) got `docker compose up` to fully healthy but then failed at `Run Health Checks` — a new DooD networking issue (bug #4 above), fixed by `091a4fa`. Build #4 is the first fully green run.
+
+Sprint 7 (stories 7.4–7.10) is functionally done and pipeline-verified. Nothing outstanding except optionally eyeballing the Blue Ocean UI/console for cosmetic confirmation, which is not load-bearing since the REST API already confirms correctness.
 
 ## Where to look next
 
