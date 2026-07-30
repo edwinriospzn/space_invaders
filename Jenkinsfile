@@ -55,11 +55,54 @@ pipeline {
                 sh 'docker build -f infrastructure/docker/airflow/Dockerfile -t space-invaders-airflow:${BUILD_NUMBER} infrastructure/docker/airflow'
             }
         }
+
+        stage('docker compose up') {
+            steps {
+                dir('infrastructure/docker') {
+                    sh 'docker compose up -d --build --wait --wait-timeout 300'
+                }
+            }
+        }
+
+        stage('Run Health Checks') {
+            steps {
+                dir('infrastructure/docker') {
+                    sh 'curl --fail http://localhost:8000/health'
+                    sh 'docker compose exec -T postgres pg_isready -U space_invaders'
+                    sh 'curl --fail http://localhost:8080/api/v2/monitor/health'
+                }
+            }
+        }
+
+        stage('Run API Tests') {
+            environment {
+                DATABASE_URL = 'postgresql://space_invaders:space_invaders@localhost:5432/space_invaders'
+            }
+            steps {
+                dir('backend/api') {
+                    sh 'python3 -m alembic upgrade head'
+                    sh 'python3 -m pytest'
+                }
+            }
+        }
+
+        stage('Shutdown') {
+            steps {
+                dir('infrastructure/docker') {
+                    sh 'docker compose down -v'
+                }
+            }
+        }
     }
 
     post {
         success {
             echo 'Success'
+        }
+        always {
+            dir('infrastructure/docker') {
+                sh 'docker compose down -v || true'
+            }
         }
     }
 }
