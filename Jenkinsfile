@@ -164,9 +164,13 @@ pipeline {
 
     post {
         success {
-            echo 'Success'
+            echo "Build #${env.BUILD_NUMBER} succeeded: all stages completed."
+        }
+        failure {
+            echo "Build #${env.BUILD_NUMBER} failed in stage '${env.STAGE_NAME}'. See the console log above for the specific error."
         }
         always {
+            echo "Build #${env.BUILD_NUMBER} finished with status ${currentBuild.currentResult} in ${currentBuild.durationString}."
             dir('infrastructure/docker') {
                 sh 'docker compose down -v || true'
             }
