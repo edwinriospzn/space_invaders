@@ -1,0 +1,27 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: airflow-init
+spec:
+  backoffLimit: 3
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: airflow-init
+          image: space-invaders-airflow:latest
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: airflow-config
+          command: ["/bin/bash", "-c"]
+          args:
+            - |
+              airflow db migrate
+              airflow users create \
+                --username airflow \
+                --password airflow \
+                --firstname airflow \
+                --lastname airflow \
+                --role Admin \
+                --email airflow@example.com || true
