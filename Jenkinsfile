@@ -35,7 +35,13 @@ pipeline {
             steps {
                 dir('backend/api') {
                     sh 'python3 -m alembic upgrade head'
-                    sh 'python3 -m pytest'
+                    sh 'python3 -m pytest --junitxml=test-reports/backend-tests.xml --cov=app --cov-report=xml:coverage-reports/backend-coverage.xml --cov-report=html:coverage-reports/backend-html'
+                }
+            }
+            post {
+                always {
+                    junit 'backend/api/test-reports/backend-tests.xml'
+                    archiveArtifacts artifacts: 'backend/api/coverage-reports/**', allowEmptyArchive: true
                 }
             }
         }
@@ -52,6 +58,11 @@ pipeline {
                 }
                 dir('frontend/game') {
                     sh 'npm run build'
+                }
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: 'frontend/game/dist/**', allowEmptyArchive: true
                 }
             }
         }
@@ -131,7 +142,13 @@ pipeline {
             steps {
                 dir('backend/api') {
                     sh 'python3 -m alembic upgrade head'
-                    sh 'python3 -m pytest'
+                    sh 'python3 -m pytest --junitxml=test-reports/integration-tests.xml --cov=app --cov-report=xml:coverage-reports/integration-coverage.xml --cov-report=html:coverage-reports/integration-html'
+                }
+            }
+            post {
+                always {
+                    junit 'backend/api/test-reports/integration-tests.xml'
+                    archiveArtifacts artifacts: 'backend/api/coverage-reports/**', allowEmptyArchive: true
                 }
             }
         }
