@@ -3,3 +3,5 @@ docker-plugin
 workflow-aggregator
 blueocean
 github
+ansicolor
+timestamper
