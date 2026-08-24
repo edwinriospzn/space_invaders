@@ -1,3 +1,4 @@
+# app/main.py
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
@@ -6,6 +7,9 @@ from fastapi.responses import JSONResponse
 from app.core.config import settings
 from app.core.logging import setup_logging, logger
 from app.api.router import api_router
+from app.database.connection import engine
+from app.database.base import Base
+import subprocess
 
 setup_logging()
 
@@ -52,9 +56,26 @@ async def unhandled_exception_handler(request: Request, exc: Exception):
     )
 
 
+def run_migrations():
+    """Run Alembic migrations on startup"""
+    try:
+        import alembic.config
+        alembic_args = [
+            '--raiseerr',
+            'upgrade', 'head'
+        ]
+        alembic.config.main(argv=alembic_args)
+        logger.info("✅ Database migrations completed successfully")
+    except Exception as e:
+        logger.error(f"❌ Failed to run migrations: {e}")
+        # Continue anyway - maybe tables already exist
+
+
 @app.on_event("startup")
 async def on_startup():
     logger.info("Application startup")
+    # Run migrations on startup
+    run_migrations()
 
 
 @app.on_event("shutdown")
